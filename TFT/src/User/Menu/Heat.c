@@ -124,6 +124,9 @@ void heatSetCurrentTool(TOOL tool)
 {
   if(tool >= (infoSettings.tool_count + 1)) return;
   heater.tool = tool;
+  // This is a rough hack with a hardcode to menu item.
+  // I couldn't figure out, how to make it correctly.
+  heatItems.items[KEY_ICON_4] = itemTool[tool];
 }
 /* Get current tool, nozzle or hot bed */
 TOOL heatGetCurrentTool(void)
@@ -134,10 +137,11 @@ TOOL heatGetCurrentTool(void)
 /* Set current nozzle */
 void heatSetCurrentToolNozzle(TOOL tool)
 {
-  if(tool >= (infoSettings.tool_count + 1) && tool < NOZZLE0) return;
+  if(tool >= (infoSettings.tool_count + 1) || tool < NOZZLE0) return;
   heater.nozzle = tool;
   heater.tool = tool;
 }
+
 /* Get current nozzle*/
 TOOL heatGetCurrentToolNozzle(void)
 {

@@ -17,6 +17,7 @@ const char *const ignoreEcho[] = {
   "echo:  M",   //M503
   "Cap:",       //M115
   "Config:",    //M360
+  "Settings Stored" // M500
 };
 
 bool portSeen[_UART_CNT] = {false, false, false, false, false, false};
@@ -96,10 +97,11 @@ bool dmaL1NotEmpty(uint8_t port)
 void syncL2CacheFromL1(uint8_t port)
 {
   uint16_t i = 0;
-  for (i = 0; dmaL1NotEmpty(port) && dmaL2Cache[i-1] != '\n'; i++)
+  while (dmaL1NotEmpty(port))
   {
     dmaL2Cache[i] = dmaL1Data[port].cache[dmaL1Data[port].rIndex];
     dmaL1Data[port].rIndex = (dmaL1Data[port].rIndex + 1) % DMA_TRANS_LEN;
+    if (dmaL2Cache[i++] == '\n') break;
   }
   dmaL2Cache[i] = 0; // End character
 }
@@ -116,13 +118,18 @@ void parseACK(void)
 
     if(infoHost.connected == false) //not connected to Marlin
     {
+      // Parse error information even though not connected to printer
+      if(ack_seen(errormagic)) {
+        BUZZER_PLAY(sound_error);
+        ackPopupInfo(errormagic);
+      }
       if(!ack_seen("T:") && !ack_seen("T0:"))  goto parse_end;  //the first response should be such as "T:25/50\n"
-        updateNextHeatCheckTime();
-        infoHost.connected = true;
-        storeCmd("M115\n");
-        storeCmd("M503 S0\n");
-        storeCmd("M92\n"); // Steps/mm of extruder is an important parameter for Smart filament runout
-                           // Avoid can't getting this parameter due to disabled M503 in Marlin
+      updateNextHeatCheckTime();
+      infoHost.connected = true;
+      storeCmd("M115\n");
+      storeCmd("M503 S0\n");
+      storeCmd("M92\n"); // Steps/mm of extruder is an important parameter for Smart filament runout
+                         // Avoid can't getting this parameter due to disabled M503 in Marlin
     }
 
     // Gcode command response
@@ -173,10 +180,9 @@ void parseACK(void)
       // parse temperature
       if(ack_seen("T:") || ack_seen("T0:"))
       {
-        TOOL i = heatGetCurrentToolNozzle();
-        heatSetCurrentTemp(i, ack_value()+0.5);
-        if(!heatGetSendWaiting(i)){
-          heatSyncTargetTemp(i, ack_second_value()+0.5);
+        heatSetCurrentTemp(NOZZLE0, ack_value()+0.5);
+        if(!heatGetSendWaiting(NOZZLE0)) {
+          heatSyncTargetTemp(NOZZLE0, ack_second_value()+0.5);
         }
         for(TOOL i = BED; i < HEATER_COUNT; i++)
         {
@@ -378,10 +384,6 @@ void parseACK(void)
           setParameter(P_PROBE_OFFSET,Z_STEPPER, ack_value());
         }
       }
-      else if (ack_seen(" F0:"))
-      {
-        fanSetSpeed(0, ack_value());
-      }
     // parse and store feed rate percentage
       else if(ack_seen("FR:"))
       {
@@ -392,6 +394,14 @@ void parseACK(void)
       {
         speedSetPercent(1,ack_value());
       }
+    // parse fan speed
+      else if(ack_seen("M106 P"))
+      {
+        u8 i = ack_value();
+        if (ack_seen("S"))
+          fanSetSpeed(i, ack_value());
+      }
+    // Parse pause message
       else if(ack_seen("paused for user"))
       {
         popupPauseForUser();

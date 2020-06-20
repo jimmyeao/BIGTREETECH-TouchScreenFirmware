@@ -334,12 +334,12 @@ void ST7920_DrawPixel(int16_t x, int16_t y, bool isForeGround)
                       SIMULATOR_YSTART_FULLSCREEN + PIXEL_YSIZE_FULLSCREEN*y,
                       SIMULATOR_XSTART_FULLSCREEN + PIXEL_XSIZE_FULLSCREEN*(x+1),
                       SIMULATOR_YSTART_FULLSCREEN + PIXEL_YSIZE_FULLSCREEN*(y+1),
-                      lcd_colors[isForeGround ? infoSettings.marlin_mode_font_color : infoSettings.marlin_mode_bg_color]);
+                      isForeGround ? infoSettings.marlin_mode_font_color : infoSettings.marlin_mode_bg_color);
 
   } else {
     GUI_FillRectColor(SIMULATOR_XSTART + PIXEL_XSIZE*x,     SIMULATOR_YSTART + PIXEL_YSIZE*y ,
                       SIMULATOR_XSTART + PIXEL_XSIZE*(x+1), SIMULATOR_YSTART + PIXEL_YSIZE*(y+1),
-                      lcd_colors[isForeGround ? infoSettings.marlin_mode_font_color : infoSettings.marlin_mode_bg_color]);
+                      isForeGround ? infoSettings.marlin_mode_font_color : infoSettings.marlin_mode_bg_color);
   }
 }
 
@@ -558,8 +558,10 @@ void ST7920_ParseRecv(u8 val)
   {
     st7920_reg.ctrl_status = (ST7920_CTRL_STATUS)val;
     rcvIndex = 0;
-    st7920.address_is_y = 1;
-    st7920_reg.cgram = 0;
+    if (st7920_reg.ctrl_status == ST7920_WDATA) {
+      st7920.address_is_y = 1;
+      st7920_reg.cgram = 0;
+    }
   }
   else
   {
@@ -633,9 +635,9 @@ void ST7920_ST7920_ParseWData(u8 data)
 
 void menuST7920(void)
 {
-  GUI_Clear(lcd_colors[infoSettings.marlin_mode_bg_color]);
-  GUI_SetColor(lcd_colors[infoSettings.marlin_mode_font_color]);
-  GUI_SetBkColor(lcd_colors[infoSettings.marlin_mode_bg_color]);
+  GUI_Clear(infoSettings.marlin_mode_bg_color);
+  GUI_SetColor(infoSettings.marlin_mode_font_color);
+  GUI_SetBkColor(infoSettings.marlin_mode_bg_color);
 
   if(infoSettings.marlin_mode_showtitle == 1){
     STRINGS_STORE tempST;

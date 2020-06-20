@@ -137,7 +137,7 @@ void drawTemperature(void)
 
   GUI_SetTextMode(GUI_TEXTMODE_NORMAL);
   GUI_SetColor(GANTRYLBL_COLOR);
-  GUI_SetBkColor(lcd_colors[infoSettings.status_xyz_bg_color]);
+  GUI_SetBkColor(infoSettings.status_xyz_bg_color);
   my_sprintf(tempstr, "   X: %.2f   Y: %.2f   Z: %.2f   ", xaxis, yaxis, zaxis);
   GUI_DispStringInPrect(&RecGantry,(u8 *)tempstr);
 
@@ -233,8 +233,8 @@ float getAxisLocation(u8 n){
 
 void statusScreen_setMsg(const uint8_t *title, const uint8_t *msg)
 {
-  memcpy(msgtitle, (char *)title, sizeof(msgtitle));
-  memcpy(msgbody, (char *)msg, sizeof(msgbody));
+  strncpy(msgtitle, (char *)title, sizeof(msgtitle));
+  strncpy(msgbody, (char *)msg, sizeof(msgbody));
 
   if (infoMenu.menu[infoMenu.cur] == menuStatus && booted == true)
   {
@@ -305,10 +305,10 @@ void menuStatus(void)
 {
   booted = true;
   KEY_VALUES key_num = KEY_IDLE;
-  GUI_SetBkColor(lcd_colors[infoSettings.bg_color]);
+  GUI_SetBkColor(infoSettings.bg_color);
   //set_status_icon();
   menuDrawPage(&StatusItems);
-  GUI_SetColor(lcd_colors[infoSettings.status_xyz_bg_color]);
+  GUI_SetColor(infoSettings.status_xyz_bg_color);
       //GUI_ClearPrect(&RecGantry);
   GUI_FillPrect(&RecGantry);
   drawTemperature();
@@ -317,10 +317,10 @@ void menuStatus(void)
   {
     if(infoHost.connected != lastConnection_status){
       if(infoHost.connected == false){
-        statusScreen_setMsg(textSelect(LABEL_SCREEN_INFO), textSelect(LABEL_UNCONNECTED));
+        statusScreen_setMsg(textSelect(LABEL_STATUS), textSelect(LABEL_UNCONNECTED));
       }
       else{
-        statusScreen_setMsg(textSelect(LABEL_SCREEN_INFO), textSelect(LABEL_READY));
+        statusScreen_setMsg(textSelect(LABEL_STATUS), textSelect(LABEL_READY));
       }
       lastConnection_status = infoHost.connected;
     }
@@ -329,10 +329,12 @@ void menuStatus(void)
     switch (key_num)
     {
       case KEY_ICON_0:
-        infoMenu.menu[++infoMenu.cur] = menuUnifiedHeat;
+        heatSetCurrentTool(NOZZLE0);
+        infoMenu.menu[++infoMenu.cur] = menuHeat;
         break;
       case KEY_ICON_1:
-        infoMenu.menu[++infoMenu.cur] = menuUnifiedHeat;
+        heatSetCurrentTool(BED);
+        infoMenu.menu[++infoMenu.cur] = menuHeat;
         break;
       case KEY_ICON_2:
         infoMenu.menu[++infoMenu.cur] = menuFan;

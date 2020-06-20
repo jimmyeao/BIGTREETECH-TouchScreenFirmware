@@ -63,7 +63,7 @@
  *         12: DARKBLUE,  13: DARKGREEN,  14: GRAY,   15: DARKGRAY
  */
 #define ST7920_BKCOLOR 1
-#define ST7920_FNCOLOR 8
+#define ST7920_FNCOLOR 2
 
 /**
  *  Text displayed at the top of the TFT in Marlin Mode.
@@ -191,7 +191,7 @@
 #define Z_MIN_POS 0
 #define X_MAX_POS 235
 #define Y_MAX_POS 235
-#define Z_MAX_POS 250
+#define Z_MAX_POS 180
 
 // Specify a pause position as { X, Y, Z_raise }
 #define NOZZLE_PAUSE_RETRACT_LENGTH 2   // (mm)

@@ -96,7 +96,7 @@
 #define MARLIN_FNCOLOR 2  // Default: 0
 
 // Text displayed at the top of the TFT in Marlin Mode
-#define MARLIN_BANNER_TEXT "Ender 3 Plus"  // Default: "Marlin Mode"
+#define MARLIN_BANNER_TEXT "Ender 5 Plus"  // Default: "Marlin Mode"
 
 // Show banner text at the top of the TFT in Marlin Mode
 #define MARLIN_SHOW_BANNER true  // To enabled: true | To disabled: false (Default: true)
